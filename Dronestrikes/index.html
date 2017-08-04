@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web Map by Linda and Miroslav</title>
+ 
+    <link href="leaflet.css" type= "text/css" rel=stylesheet>
+	<link href="style.css" type= "text/css" rel=stylesheet>
+	<!--<link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet">-->
+    
+	
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    
+
+    <style>
+     
+
+      /*
+      * You could style the timeline however you like, but we just make it wider here.
+      */
+      .leaflet-left {
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+     <!--declare the topbar class-->
+		<div class="topbar">
+		US Dronestrikes on Pakistan 2004 - 2013
+		</div>
+		
+    <!--declare the container class-->
+		<div id="map" class="map"></div>
+		
+	<!--declare the bottombar class-->
+		<div class="bottombar">
+		<div><a href="https://www.thebureauinvestigates.com/stories/2017-01-01/drone-wars-the-full-data" target="_blank">For more information on the data click here</a> <img src="ZGIS.gif" width ="8%" height="75%" alt="Z=GIS" class="picture" /></div>
+		<div>Made by Linda and Miroslav </div>
+		</div>
+		
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
+	<script src="leaflet.js"></script>
+    <script src="leaflet.timeline.js"></script>
+    <!--points.js is the file that contains our data on dronestrikes-->
+    <script src="points.js"></script>
+    
+	
+    <script>
+
+//setting up the marker for features
+var marker = new L.Icon({iconUrl:
+	'rec.png'});
+
+
+      
+// Creating the map     
+var map = L.map('map',{
+	center: [33.00053, 70.065479],
+	zoom: 8.5,
+	minZoom:2,
+	maxZoom: 18
+	});
+	
+//Adding default basemap
+var Stamen_Terrain = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.{ext}', {
+	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+	subdomains: 'abcd',
+	minZoom: 0,
+	maxZoom: 18,
+	ext: 'png'
+}).addTo(map);
+	
+//Adding another basemap 
+var Esri_WorldImagery = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+});
+
+//Creating a baseMap object that can later be added to the map
+var baseMaps = {
+	"Terrain": Stamen_Terrain,
+	"Satellite": Esri_WorldImagery
+	}
+	
+// This is the actual control that allows playback. It can control multiple L.Timelines.
+var slider = L.timelineSliderControl({
+    formatOutput: function(date){
+          return moment(date).format("YYYY-MM-DD");
+        }
+      });
+      map.addControl(slider);
+
+//add features and slider to the map. Call above created function	  
+var pointTimeline = L.timeline(points, {onEachFeature: setMarker});
+      pointTimeline.addTo(map);
+      slider.addTimelines(pointTimeline);
+      
+//adding the geoJson file containing the data to the map
+     // L.geoJson(points).addTo(map);	  
+
+//Defining which information from the geoJson file shall be displayed in the popups that are bound to the markers
+function setMarker (feature, layer){
+	layer.bindPopup("<h3 class='infoHeader'>Info on Dronestrikes</h3><p class='infoHeader'>"
+	+"Location: "+ feature.properties.location+"</p>"+"<p class='infoHeader'>"+"Max.killed: "+feature.properties.maximum_to+"</p>"+"<p class='infoHeader'>"+"Min.killed: "+feature.properties.minimum_to+"</p>"+"<p class='infoHeader'>"+"Date: "
+	+feature.properties.start+"</p>");
+	layer.setIcon (marker);
+	};
+   
+
+//adding scale
+	 L.control.scale({position:'bottomleft', metric:true}).addTo(map);
+	 
+//adding legend for the basemaps 
+	 var legend = L.control.layers(baseMaps).addTo(map);
+
+
+    </script>
+    
+  </body>
+</html>
